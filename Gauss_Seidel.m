@@ -26,8 +26,16 @@ Element_Count = (N+2) * M; %+2 comes from the two Neumann boundary conditions im
 %known values) matrices:
 K = zeros(Element_Count, Element_Count);
 P = zeros(Element_Count, 1);
-i = 0;
-for j = 1:M
-    while (i < N)
-        i = i + 1;
-        K(
+for j = 1:M %i + (N+2) * (j-1) for indexing the column values
+    for i = 1:(N+2)
+        K(i + (N+2) * (j-1), i + (N+2) * (j-1)) = A; %Fills the diagonal with the A values
+        if (i == 1)
+            K(i + (N+2) * (j-1), i + (N+2) * (j-1) + 1) = 2 * (DY^2);
+        elseif (i == N+2)
+            K(i + (N+2) * (j-1), i + (N+2) * (j-1) - 1) = 2 * (DY^2);
+        else
+            K(i + (N+2) * (j-1), i + (N+2) * (j-1) + 1) = DY^2;
+            K(i + (N+2) * (j-1), i + (N+2) * (j-1) - 1) = DY^2;
+        end
+    end
+end
