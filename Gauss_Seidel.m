@@ -69,3 +69,38 @@ for i = 1:Element_Count
         P(i,1) = B * F(i, 1); %All values not impacted by Dirichlet Boundary Conditions
     end
 end
+save variables.mat
+%%
+load variables.mat
+%Performing iterations of Gauss-Seidel Method to solve for U values
+%(unknown solution values over X and Y domains):
+U = zeros(Element_Count, 1);
+W = zeros(Element_Count, 1);
+Z = 0; %Z functions as a counter for number of iterations performed during Gauss-Seidel
+Error = zeros(1, Element_Count);
+Ea = 100; %Provides initial value of Ea, or the relative iterative error, for the Gauss_Seidel Approximation
+if (A ~= 0)%Set condition for just in case the center diagonal is zero from a poor choice in nodes along X and Y domains
+while (Ea > Es)
+    for i = 1:Element_Count
+        W(i,1) = U(i,1); %Provides value of U from previous iteration to be used in evaluating the relative error
+        U(i,1) = P(i,1) / K(i,i); %Known value divided by the desired U-value's associated coefficient, from which iterations will subtract from for Gauss-Seidel Approximation
+        for j = 1:Element_Count
+            if (i==j)
+                U(i,1) = U(i,1); %Keeps the loop from subtracting the necessary P-value from itself when performing iterations
+            else
+                U(i,1) = U(i,1) - (K(i,j) * U(j,1) / K(i,i)); %Subtracts each successive U value (divided by the coefficient of the desired U value) from the equation (in essence the heart of the Gauss-Seidel Approximation)
+            end
+        end
+        Error(1,i) = abs((U(i,1) - W(i,1)) / U(i,1)); %Computes the relative error of each U value individually
+    end
+    Ea = max(Error); %Uses maximum relative error of iteration as operational relative error value to be used to satisfy the loop condition
+    Z = Z + 1; %Counts number of iterations
+end
+else
+    disp('Cannot compute as coefficient matrix center diagonal = 0. Consider entering different number of nodes for X and/or Y domain.')
+end
+Answer = P\K; %Provides exact solution for comparison (need to verify that it is correct as well)
+%%
+%Gauss Seidel Approximation is outputting divergent (approches infinity)
+%values for the U matrix. Consider indexing loike the matrix setup and
+%separating into independent blocks to aid in grid convergence.
