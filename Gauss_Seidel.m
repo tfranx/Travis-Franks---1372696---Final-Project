@@ -109,14 +109,24 @@ xlabel('Y axis'), ylabel('X axis')
 clabel(Matrix, Object) %Labels the peak values for all of the contour lines
 %%
 %Assuming square matrix, only converges with 14X14 matrix size, anything
-%lower(<13X13) diverges and fails. Test for correctness, then robustness (Works for all values for lambda = 0).
+%lower(<13X13) diverges and fails. Test for correctness, then robustness (Works for all values for lambda = 0) (DONE).
+
 %Once proven correct, move to reduce time in code by loop unrolling, in
-%which you approach from topleft corner of domain at the same time that you
-%solve from the bottom left corner (as is already implemented). Then
-%introduce restart points with save/load commands at approximately every 2 minutes of
+%which you approach from topright corner of domain at the same time that you
+%solve from the bottom left corner (as is already implemented). (IS THIS
+%NECESSARY FOR POINTS?)
+
+%Then introduce restart points with save/load commands at approximately every 2 minutes of
 %running (use tic/toc commands and save a time variable that adds like a
-%counter for each loop. Then check over code for other potential
-%optimizations. Finally, solve with SOR, experimenting with different
+%counter for each loop)(DONE).
+
+%Then check over code for other potential
+%optimizations. 
+
+%Finally, solve with SOR, experimenting with different
 %values of lambda between 1 and 2 for the fastest one (may be dependent on
-%number of nodes in each domain). Then plot both appoximations and do
-%report.
+%number of nodes in each domain).
+
+%Then plot both appoximations. (DONE)
+
+%Do report.
