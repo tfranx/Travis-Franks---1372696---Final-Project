@@ -40,9 +40,24 @@ end
 %discretization:
 NN = N-1;
 MM = M-1;
+%Defining initial Tcheck value for checkpointing every set period of time of
+%the Gauss-Seidel loop:
+Tcheck = 60; %checkpoint every 60 seconds
+%Defining initial timer variable value to be greater than start timer initial value to start timer loop in Gauss-Seidel loop:
+T = 0;
+Tcounter = 0; %Stores time values for combined loop times, if loop takes less than a minute to run
+save('Variables.mat') %Resets variable values before load checkpoint, so code can be run from either the start or load point
+%%
+%*****To load variables for checkpointing, run starting from this block*****
+load('Variables.mat')
 %Performing Gauss Seidel Approximation to solve for U values:
 if (A ~= 0)%Set condition for just in case the variable coefficient is equal to zero from a poor choice in nodes along X and Y domains, as it will function as a denominator
     while (Ea > Es)
+        tic;
+        if (Tcounter >= Tcheck) %Saves at least every 60 seconds or every Gauss-Seidel loop iteration, if the iterations take longer
+            Tcounter = 0; %Resets time counter to 0
+            save('Variables') %Saves variables for checkpointing for start/restart capability
+        end
         %Evaluating for U (solution) values defined by Neumann Boundary
         %Conditions that are evaluated by Gauss-Seidel Method
         for j = 2:MM
@@ -63,21 +78,28 @@ if (A ~= 0)%Set condition for just in case the variable coefficient is equal to 
             end
         end
         Ea = max(max(Error));
-        Z = Z + 1;
+        Z = Z + 1; %Counts the number of loop iterations
+        T = toc; %Determines how long the Gauss-Seidel iteration took
+        Tcounter = Tcounter + T; %Counts how much time has elapsed since the last variable checkpoint save
     end
 else
     disp('Select a different number of nodes for X or Y domain or change the value of C, the given constant for capital lambda.')
 end
-%%Plotting visualizations for ease of interpretation of results:
+save('Variables.mat')
+%%
+%Plotting visualizations for ease of interpretation of results:
+load('Variables.mat') %Provides the option of loading the variables directly onto the plot section, if a failure occurs while plotting
 
 figure
 surf(U) %Produces surface plot of solution matrix for Helmholtz equation:
 
 %Plotting contour lines of U, the solution matrix for 2-D interpretation of
 %results obtained:
+X = zeros(N,1);
 for i = 1:N
     X(i,1) = -pi() + (i-1) * DX; %Defines values along X-axis for plot, from -pi to pi along X domain
 end
+Y = zeros(M,1);
 for j = 1:M
     Y(j,1) = -pi() + (j-1) * DY; %Defines values along Y-axis for plot, from -pi to pi along Y domain
 end
