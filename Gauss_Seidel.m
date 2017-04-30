@@ -104,7 +104,7 @@ for j = 1:M
     Y(j,1) = -pi() + (j-1) * DY; %Defines values along Y-axis for plot, from -pi to pi along Y domain
 end
 figure
-[Matrix, Object] = contour(Y, X, U); %Plots the contour of the solution matrix
+[Matrix, Object] = contourf(Y, X, U); %Plots the contour of the solution matrix
 xlabel('Y axis'), ylabel('X axis')
 clabel(Matrix, Object) %Labels the peak values for all of the contour lines
 %%
