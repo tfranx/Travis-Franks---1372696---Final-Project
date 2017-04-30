@@ -49,6 +49,7 @@ if (A ~= 0)%Set condition for just in case the variable coefficient is equal to 
             W(1,j) = U(1,j); %W saves value of U for error calculation
             U(1,j) = (- 2 * (DY^2) * U(2,j) - (DX^2) * U(1,j-1) - (DX^2) * U(1,j+1)) / A;  %cos((pi() / 2) * (0 + 1)) = 0 so Fi,j = 0, Neumann condition for X = -pi
             Error(1,j) = abs((U(1,j) - W(1,j)) / U(1,j)); %Computes relative error for this calculation inside this iteration
+            
             W(N,j) = U(N,j); %W saves value of U for error calculation
             U(N,j) = (- 2 * (DY^2) * U(NN,j) - (DX^2) * U(N,j-1) - (DX^2) * U(N,j+1)) / A; %cos(3 * pi() / 2) = 0 so Fi,j = 0, Neumann condition for X = pi
             Error(N,j) = abs((U(N,j) - W(N,j)) / U(N,j)); %Computes relative error for this calculation inside this iteration
@@ -67,9 +68,26 @@ if (A ~= 0)%Set condition for just in case the variable coefficient is equal to 
 else
     disp('Select a different number of nodes for X or Y domain or change the value of C, the given constant for capital lambda.')
 end
+%%Plotting visualizations for ease of interpretation of results:
+
+figure
+surf(U) %Produces surface plot of solution matrix for Helmholtz equation:
+
+%Plotting contour lines of U, the solution matrix for 2-D interpretation of
+%results obtained:
+for i = 1:N
+    X(i,1) = -pi() + (i-1) * DX; %Defines values along X-axis for plot, from -pi to pi along X domain
+end
+for j = 1:M
+    Y(j,1) = -pi() + (j-1) * DY; %Defines values along Y-axis for plot, from -pi to pi along Y domain
+end
+figure
+[Matrix, Object] = contour(Y, X, U); %Plots the contour of the solution matrix
+xlabel('Y axis'), ylabel('X axis')
+clabel(Matrix, Object) %Labels the peak values for all of the contour lines
 %%
 %Assuming square matrix, only converges with 14X14 matrix size, anything
-%lower(<13X13) diverges and fails. Test for correctness, then robustness.
+%lower(<13X13) diverges and fails. Test for correctness, then robustness (Works for all values for lambda = 0).
 %Once proven correct, move to reduce time in code by loop unrolling, in
 %which you approach from topleft corner of domain at the same time that you
 %solve from the bottom left corner (as is already implemented). Then
