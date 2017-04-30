@@ -28,13 +28,13 @@ M = Y_Internal_Nodes + 2; %M = number of Y domain values
 U = zeros(N,M);
 W = zeros(N,M);
 Z = 0; %Z functions as a counter for number of iterations performed during Gauss-Seidel
-Error = zeros(1, N * (M-2)); %(M-2) rather than just M because the Dirichlet Boundary Conditions cause two rows to have constant values and therefore will have an error of 0 per iteration (optimal to exclude unnecessary repeated calculations) 
+Error = zeros(N,M-2); %(M-2) rather than just M because the Dirichlet Boundary Conditions cause two rows to have constant values and therefore will have an error of 0 per iteration (optimal to exclude unnecessary repeated calculations) 
 Ea = 100; %Provides initial value of Ea, or the relative iterative error, for the Gauss_Seidel Approximation
 %Solving for U values defined by Dirichlet Boundary Conditions that will
 %remain constant as Gauss Seidel iterations are performed:
 for i = 1:N
     U(i,1) = cos(pi() * DX * (i-1)) * cosh((2 * pi()) - (DX * (i-1)));
-    U(i,N) = ((i-1) * DX)^2 * sin(((i-1) * DX) / 4);
+    U(i,M) = ((i-1) * DX)^2 * sin(((i-1) * DX) / 4);
 end
 %Defining node indexing points to be used for the general form of the
 %discretization:
@@ -43,8 +43,27 @@ MM = M-1;
 %Performing Gauss Seidel Approximation to solve for U values:
 if (A ~= 0)%Set condition for just in case the variable coefficient is equal to zero from a poor choice in nodes along X and Y domains, as it will function as a denominator
     while (Ea > Es)
-        %Evaluating for general expression untouched by boundary
-        %conditions:
+        %Evaluating for U (solution) values defined by Neumann Boundary
+        %Conditions that are evaluated by Gauss-Seidel Method
+        for j = 2:MM
+            W(1,j) = U(1,j); %W saves value of U for error calculation
+            U(1,j) = (- 2 * (DY^2) * U(2,j) - (DX^2) * U(1,j-1) - (DX^2) * U(1,j+1)) / A;  %cos((pi() / 2) * (0 + 1)) = 0 so Fi,j = 0, Neumann condition for X = -pi
+            Error(1,j) = abs((U(1,j) - W(1,j)) / U(1,j)); %Computes relative error for this calculation inside this iteration
+            W(N,j) = U(N,j); %W saves value of U for error calculation
+            U(N,j) = (- 2 * (DY^2) * U(NN,j) - (DX^2) * U(N,j-1) - (DX^2) * U(N,j+1)) / A; %cos(3 * pi() / 2) = 0 so Fi,j = 0, Neumann condition for X = pi
+            Error(N,j) = abs((U(N,j) - W(N,j)) / U(N,j)); %Computes relative error for this calculation inside this iteration
+        end
+        %Evaluating for general expression (internal nodes):
         for j = 2:MM
             for i = 2:NN
-                U(i,j) = (B
+                W(i,j) = U(i,j); %W saves value of U for error calculation
+                U(i,j) = (B * (cos((pi() / 2) * ((((i-1) * DX) / pi()) + 1)) * sin(((j - 1) * DY) / 2)) - (DY^2) * U(i-1,j) - (DY^2) * U(i+1,j) - (DX^2) * U(i,j-1) - (DX^2) * U(i,j+1)) / A;
+                Error(i,j) = abs((U(i,j) - W(i,j)) / U(i,j)); %Computes relative error for this calculation inside this iteration
+            end
+        end
+        Ea = max(max(Error));
+        Z = Z + 1;
+    end
+else
+    disp('Select a different number of nodes for X or Y domain or change the value of C, the given constant for capital lambda.')
+end
