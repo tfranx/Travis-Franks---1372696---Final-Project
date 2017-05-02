@@ -1,6 +1,14 @@
 %Travis Franks 1372696 Helmholtz Equation Final Project Gauss Seidel Method
 clear all
 clc
+%Setting up for loop to determine ideal lambda value for SOR:
+Lambda = 1:.05:2;
+Lambda_Size = length(Lambda);
+GG = zeros(Lambda_Size, 1);
+ZZ = zeros(Lambda_Size, 1);
+for k = 1:Lambda_Size
+    GG(k,1) = Lambda(k);
+    G = Lambda(k);
 %Setting the value of X_Internal_Nodes, the number of elements along X-domain:
 X_Internal_Nodes = input('Enter value of X_Internal_Nodes, the number of internal nodes for the X-domain: ');
 %Setting the value of Y_Internal_Nodes, the number of elements along
@@ -9,7 +17,7 @@ Y_Internal_Nodes = input('Enter value of Y_Internal_Nodes, the number of interna
 %Setting the value of C (capital lambda in problem statement):
 C = input('Enter value of C, the given constant for capital lambda: ');
 %Setting the value of G (Overrelaxation variable):
-G = input('Enter value of G, the lambda coefficient, to be between 1 and 2, to use for SOR (overrelaxation)');
+%G = input('Enter value of G, the lambda coefficient, to be between 1 and 2, to use for SOR (overrelaxation)');
 %Setting the value of Es, the acceptable limit of error for system convergence:
 Es = 10^-10;
 %Defining L, the length of the X and Y domains:
@@ -49,7 +57,7 @@ Tcheck = 60; %checkpoint every 60 seconds
 T = 0;
 Tcounter = 0; %Stores time values for combined loop times, if loop takes less than a minute to run
 save('Variables.mat') %Resets variable values before load checkpoint, so code can be run from either the start or load point
-%%
+% (This is where the sections were initially divided)
 %*****To load variables for checkpointing, run starting from this block*****
 load('Variables.mat')
 %Performing Gauss Seidel Approximation to solve for U values:
@@ -90,6 +98,8 @@ if (A ~= 0)%Set condition for just in case the variable coefficient is equal to 
 else
     disp('Select a different number of nodes for X or Y domain or change the value of C, the given constant for capital lambda.')
 end
+ZZ(k,1) = Z; 
+end %End of for loop for determining the ideal lambda for SOR
 save('Variables.mat')
 %%
 %Plotting visualizations for ease of interpretation of results:
