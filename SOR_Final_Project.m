@@ -10,19 +10,18 @@ clc
 %    GG(k,1) = Lambda(k);
 %    G = Lambda(k);
 %Setting the value of X_Internal_Nodes, the number of elements along X-domain:
-%X_Internal_Nodes = input('Enter value of X_Internal_Nodes, the number of internal nodes for the X-domain: ');
-X_Internal_Nodes = 64;
+X_Internal_Nodes = input('Enter value of X_Internal_Nodes, the number of internal nodes for the X-domain: ');
+%X_Internal_Nodes = 64;
 %Setting the value of Y_Internal_Nodes, the number of elements along
 %Y-domain:
-%Y_Internal_Nodes = input('Enter value of Y_Internal_Nodes, the number of internal nodes for the Y-domain: ');
-Y_Internal_Nodes = 64;
+Y_Internal_Nodes = input('Enter value of Y_Internal_Nodes, the number of internal nodes for the Y-domain: ');
+%Y_Internal_Nodes = 64;
 %Setting the value of C (capital lambda in problem statement):
-%C = input('Enter value of C, the given constant for capital lambda: ');
-C = 1.5;
+C = input('Enter value of C, the given constant for capital lambda: ');
 %Setting the value of G (Overrelaxation variable):
-%G = input('Enter value of G, the lambda coefficient, to be between 1 and 2, to use for SOR (overrelaxation)');
+G = input('Enter value of G, the lambda coefficient, to be between 1 and 2, to use for SOR (overrelaxation): ');
 %Setting the value of Es, the acceptable limit of error for system convergence:
-Es = 10^-10;
+Es = 10^-9;
 %Defining L, the length of the X and Y domains:
 L = 2 * pi();
 %Determining DX and DY, the change of X and Y respectively from element to
@@ -30,8 +29,8 @@ L = 2 * pi();
 DX = L / (X_Internal_Nodes + 1);
 DY = L / (Y_Internal_Nodes + 1);
 %Defining coefficients, A and B, that remain constant throughout matrix operations:
-A = C - (2 * (DX^2)) - (2 * (DY^2));
 B = (DX^2) * (DY^2);
+A = (B * C) - (2 * (DX^2)) - (2 * (DY^2));
 %Determining number of elements  on both X and Y domains, so as to only
 %perform the calculation one time for optimization:
 N = X_Internal_Nodes + 2; %N = number of X domain values
