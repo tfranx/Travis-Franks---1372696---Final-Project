@@ -96,7 +96,15 @@ if (A ~= 0)%Set condition for just in case the variable coefficient is equal to 
         for j = 2:MM
             for i = 2:NN
                 W(i,j) = U(i,j); %W saves value of U for error calculation
+                %OPTIMIZES via loop unrolling by evaluating from multiple
+                %start points on domain within loop:
+                
+                %Evaluates starting from bottom left corner of domain:
                 U(i,j) = (B * F(i,j) - (DY^2) * U(i-1,j) - (DY^2) * U(i+1,j) - (DX^2) * U(i,j-1) - (DX^2) * U(i,j+1)) / A;
+                
+                %Evaluates starting from top right corner of domain:
+                U(N-i+1,M-j+1) = (B * F(N-i+1, M-j+1) - (DY^2) * U(N-i,M-j+1) - (DY^2) * U(N-i+2,M-j+1) - (DX^2) * U(N-i+1,M-j) - (DX^2) * U(N-i+1,M-j+2)) / A;
+                
                 Error(i,j) = abs((U(i,j) - W(i,j)) / U(i,j)); %Computes relative error for this calculation inside this iteration
             end
             
