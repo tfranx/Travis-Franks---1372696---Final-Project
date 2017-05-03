@@ -2,20 +2,23 @@
 clear all
 clc
 %Setting up for loop to determine ideal lambda value for SOR:
-Lambda = 1:.05:2;
-Lambda_Size = length(Lambda);
-GG = zeros(Lambda_Size, 1);
-ZZ = zeros(Lambda_Size, 1);
-for k = 1:Lambda_Size
-    GG(k,1) = Lambda(k);
-    G = Lambda(k);
+%Lambda = 1:.05:2;
+%Lambda_Size = length(Lambda);
+%GG = zeros(Lambda_Size, 1);
+%ZZ = zeros(Lambda_Size, 1);
+%for k = 1:Lambda_Size
+%    GG(k,1) = Lambda(k);
+%    G = Lambda(k);
 %Setting the value of X_Internal_Nodes, the number of elements along X-domain:
-X_Internal_Nodes = input('Enter value of X_Internal_Nodes, the number of internal nodes for the X-domain: ');
+%X_Internal_Nodes = input('Enter value of X_Internal_Nodes, the number of internal nodes for the X-domain: ');
+X_Internal_Nodes = 64;
 %Setting the value of Y_Internal_Nodes, the number of elements along
 %Y-domain:
-Y_Internal_Nodes = input('Enter value of Y_Internal_Nodes, the number of internal nodes for the Y-domain: ');
+%Y_Internal_Nodes = input('Enter value of Y_Internal_Nodes, the number of internal nodes for the Y-domain: ');
+Y_Internal_Nodes = 64;
 %Setting the value of C (capital lambda in problem statement):
-C = input('Enter value of C, the given constant for capital lambda: ');
+%C = input('Enter value of C, the given constant for capital lambda: ');
+C = 1.5;
 %Setting the value of G (Overrelaxation variable):
 %G = input('Enter value of G, the lambda coefficient, to be between 1 and 2, to use for SOR (overrelaxation)');
 %Setting the value of Es, the acceptable limit of error for system convergence:
@@ -98,8 +101,8 @@ if (A ~= 0)%Set condition for just in case the variable coefficient is equal to 
 else
     disp('Select a different number of nodes for X or Y domain or change the value of C, the given constant for capital lambda.')
 end
-ZZ(k,1) = Z; 
-end %End of for loop for determining the ideal lambda for SOR
+%ZZ(k,1) = Z; 
+%end %End of for loop for determining the ideal lambda for SOR
 save('Variables.mat')
 %%
 %Plotting visualizations for ease of interpretation of results:
