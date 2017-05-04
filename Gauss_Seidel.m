@@ -45,25 +45,33 @@ M = Y_Internal_Nodes + 2; %M = number of Y domain values
 
 %Performing setup for Gauss-Seidel Approximation that will solve for U values
 %(unknown solution values over X and Y domains):
-U = zeros(N,M);
+U = zeros(N,M); %Provides initial guesses and preallocates for optimization
+%for i = 1:N
+%    for j = 1:M
+%        U(i,j) = 1 + X(i,j)^2 + 2 * Y(i,j)^2; %To be used only for method of manufactured solutions
+%    end
+%end
 W = zeros(N,M);
 Z = 0; %Z functions as a counter for number of iterations performed during Gauss-Seidel
-Error = zeros(N,M-2); %(M-2) rather than just M because the Dirichlet Boundary Conditions cause two rows to have constant values and therefore will have an error of 0 per iteration (optimal to exclude unnecessary repeated calculations) 
+Error = zeros(N,M-2); %(M-2) rather than just M because the Dirichlet Boundary Conditions cause two rows to have 
+%constant values and therefore will have an error of 0 per iteration (optimal to exclude unnecessary repeated calculations) 
 Ea = 100; %Provides initial value of Ea, or the relative iterative error, for the Gauss_Seidel Approximation
+
+%Evaluating for F values:
+F = zeros(N,M);
+for i = 1:N
+    for j = 1:M
+        %F(i,j) = 6 + C * (1 + X(i,j)^2 + 2 * Y(i,j)^2); %To be used only for Method of Manufactured Solutions
+        %F(i,j) = 0; %To be commented out unless simulating Laplace or debugging
+        F(i,j) = cos((pi/2) * (2 * ((X(i,j) - ax) / (bx - ax)) + 1)) * sin(pi * ((Y(i,j) - ay) / (by - ay)));
+    end
+end
 
 %Solving for U values defined by Dirichlet Boundary Conditions that will
 %remain constant as Gauss Seidel iterations are performed:
 for i = 1:N
     U(i,1) = cos(pi() * DX * (i-1)) * cosh((2 * pi()) - (DX * (i-1))); %Dirichlet BC at Y = -pi
     U(i,M) = ((i-1) * DX)^2 * sin(((i-1) * DX) / 4); %Dirichlet BC at Y = pi
-end
-
-%Evaluating for F values:
-F = zeros(N,M);
-for i = 1:N
-    for j = 1:M
-        F(i,j) = cos((pi/2) * (2 * ((X(i,j) - ax) / (bx - ax)) + 1)) * sin(pi * ((Y(i,j) - ay) / (by - ay)));
-    end
 end
 
 %Defining node indexing points to be used for the general form of the
@@ -78,6 +86,7 @@ Tcheck = 60; %checkpoint every 60 seconds
 %Defining initial timer variable value to be greater than start timer initial value to start timer loop in Gauss-Seidel loop:
 T = 0;
 Tcounter = 0; %Stores time values for combined loop times, if loop takes less than a minute to run
+Ttotal = 0; %Stores the total time elapsed while performing Gauss-Seidel iterations
 save('Variables.mat') %Resets variable values before load checkpoint, so code can be run from either the start or load point
 %%
 %*****To load variables for checkpointing, run starting from this block*****
@@ -135,6 +144,8 @@ if (A ~= 0)%Set condition for just in case the variable coefficient is equal to 
         T = toc; %Determines how long the Gauss-Seidel iteration took
         
         Tcounter = Tcounter + T; %Counts how much time has elapsed since the last variable checkpoint save
+        
+        Ttotal = Ttotal + T;
     end
 else
     disp('Select a different number of nodes for X or Y domain or change the value of C, the given constant for capital lambda.')
@@ -144,18 +155,23 @@ save('Variables.mat')
 %Plotting visualizations for ease of interpretation of results:
 load('Variables.mat') %Provides the option of loading the variables directly onto the plot section, if a failure occurs while plotting
 
+%Displaying the total time elapsed during the Gauss-Seidel approximation
+%iterations, Ttotal:
+disp('Total time elapsed = ')
+disp(Ttotal)
+
 %Plotting surface plot of U, the solution matrix for the Helmholtz
 %equation:
 figure
 subplot(1,2,1)
 surf(X, Y, U) %Produces surface plot of solution matrix for the Helmholtz equation:
-xlabel('X axis'), ylabel('Y axis'), title('Surface Plot of U for Lambda = 0.2')
+xlabel('X axis'), ylabel('Y axis'), title('Surface Plot of U for Method of Manufactured Solutions'), colorbar
 
 %Plotting contour lines of U, the solution matrix for 2-D interpretation of
 %results obtained:
 subplot(1,2,2)
 [Matrix, Object] = contourf(X, Y, U); %Plots the contour of the solution matrix
-xlabel('X axis'), ylabel('Y axis'), title('Contour Plot of U for Lambda = 0.2')
+xlabel('X axis'), ylabel('Y axis'), title('Contour Plot of U for Method of Manufactured Solutions'), colorbar
 clabel(Matrix, Object) %Labels the peak values for all of the contour lines
 
 %Plotting vector plot of U matrix:
@@ -164,26 +180,3 @@ clabel(Matrix, Object) %Labels the peak values for all of the contour lines
 %hold on
 %quiver(X,Y,U',U)
 %hold off
-%%
-%Assuming square matrix, only converges with 14X14 matrix size, anything
-%lower(<13X13) diverges and fails. Test for correctness, then robustness (Works for all values for lambda = 0) (DONE).
-
-%Once proven correct, move to reduce time in code by loop unrolling, in
-%which you approach from topright corner of domain at the same time that you
-%solve from the bottom left corner (as is already implemented). (IS THIS
-%NECESSARY FOR POINTS?)
-
-%Then introduce restart points with save/load commands at approximately every 2 minutes of
-%running (use tic/toc commands and save a time variable that adds like a
-%counter for each loop)(DONE).
-
-%Then check over code for other potential
-%optimizations. 
-
-%Finally, solve with SOR, experimenting with different
-%values of lambda between 1 and 2 for the fastest one (may be dependent on
-%number of nodes in each domain). (DONE)
-
-%Then plot both appoximations. (DONE)
-
-%Do report.
