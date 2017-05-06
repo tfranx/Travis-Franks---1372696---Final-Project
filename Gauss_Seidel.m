@@ -1,5 +1,5 @@
 %Travis Franks 1372696 Helmholtz Equation Final Project Gauss Seidel Method
-clear all
+clearvars
 clc
 
 %Defining ax, bx, ay, and by:
@@ -46,15 +46,20 @@ M = Y_Internal_Nodes + 2; %M = number of Y domain values
 %Performing setup for Gauss-Seidel Approximation that will solve for U values
 %(unknown solution values over X and Y domains):
 U = zeros(N,M); %Provides initial guesses and preallocates for optimization
+
 %for i = 1:N
 %    for j = 1:M
 %        U(i,j) = 1 + X(i,j)^2 + 2 * Y(i,j)^2; %To be used only for method of manufactured solutions
 %    end
 %end
+
 W = zeros(N,M);
+
 Z = 0; %Z functions as a counter for number of iterations performed during Gauss-Seidel
+
 Error = zeros(N,M-2); %(M-2) rather than just M because the Dirichlet Boundary Conditions cause two rows to have 
 %constant values and therefore will have an error of 0 per iteration (optimal to exclude unnecessary repeated calculations) 
+
 Ea = 100; %Provides initial value of Ea, or the relative iterative error, for the Gauss_Seidel Approximation
 
 %Evaluating for F values:
@@ -75,7 +80,7 @@ for i = 1:N
 end
 
 %Defining node indexing points to be used for the general form of the
-%discretization:
+%discretization so as to only perform calculation once for optimization:
 NN = N-1;
 MM = M-1;
 
@@ -105,6 +110,7 @@ if (A ~= 0)%Set condition for just in case the variable coefficient is equal to 
         for j = 2:MM
             for i = 2:NN
                 W(i,j) = U(i,j); %W saves value of U for error calculation
+                
                 %OPTIMIZES via loop unrolling by evaluating from multiple
                 %start points on domain within loop:
                 
@@ -113,7 +119,6 @@ if (A ~= 0)%Set condition for just in case the variable coefficient is equal to 
                 
                 %Evaluates starting from top right corner of domain:
                 U(N-i+1,M-j+1) = (B * F(N-i+1, M-j+1) - (DY^2) * U(N-i,M-j+1) - (DY^2) * U(N-i+2,M-j+1) - (DX^2) * U(N-i+1,M-j) - (DX^2) * U(N-i+1,M-j+2)) / A;
-                
                 Error(i,j) = abs((U(i,j) - W(i,j)) / U(i,j)); %Computes relative error for this calculation inside this iteration
             end
             
@@ -145,38 +150,36 @@ if (A ~= 0)%Set condition for just in case the variable coefficient is equal to 
         
         Tcounter = Tcounter + T; %Counts how much time has elapsed since the last variable checkpoint save
         
-        Ttotal = Ttotal + T;
+        Ttotal = Ttotal + T; %Stores the total time elapsed while performing Gauss-Seidel iterations
     end
 else
     disp('Select a different number of nodes for X or Y domain or change the value of C, the given constant for capital lambda.')
 end
+
+%Performing statisical analysis of U solution matrix for Grid Independence
+%Study:
+Grid = mean(mean(U.^2));
+
 save('Variables.mat')
 %%
 %Plotting visualizations for ease of interpretation of results:
 load('Variables.mat') %Provides the option of loading the variables directly onto the plot section, if a failure occurs while plotting
 
 %Displaying the total time elapsed during the Gauss-Seidel approximation
-%iterations, Ttotal:
-disp('Total time elapsed = ')
+%iterations, Ttotal (in seconds):
+disp('Total time elapsed, in seconds = ')
 disp(Ttotal)
 
 %Plotting surface plot of U, the solution matrix for the Helmholtz
 %equation:
 figure
 subplot(1,2,1)
-surf(X, Y, U) %Produces surface plot of solution matrix for the Helmholtz equation:
-xlabel('X axis'), ylabel('Y axis'), title('Surface Plot of U for Method of Manufactured Solutions'), colorbar
+mesh(X, Y, U) %Produces surface plot of solution matrix for the Helmholtz equation:
+xlabel('X axis'), ylabel('Y axis'), title('Surface Plot of U for Lambda = 0 and F = 0'), colorbar
 
 %Plotting contour lines of U, the solution matrix for 2-D interpretation of
 %results obtained:
 subplot(1,2,2)
-[Matrix, Object] = contourf(X, Y, U); %Plots the contour of the solution matrix
-xlabel('X axis'), ylabel('Y axis'), title('Contour Plot of U for Method of Manufactured Solutions'), colorbar
+[Matrix, Object] = contourf(X, Y, U, 20); %Plots the contour of the solution matrix
+xlabel('X axis'), ylabel('Y axis'), title('Contour Plot of U for Lambda = 0 and F = 0'), colorbar
 clabel(Matrix, Object) %Labels the peak values for all of the contour lines
-
-%Plotting vector plot of U matrix:
-%figure
-%contour(X,Y,U)
-%hold on
-%quiver(X,Y,U',U)
-%hold off
